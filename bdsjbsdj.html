@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BI_Financiero – Power BI</title>
+  <style>
+    :root{
+      --bg:#071028;
+      --card:#0b1220;
+      --accent:#2563eb;
+      --muted:#94a3b8;
+    }
+    *{box-sizing:border-box}
+    body {
+      margin:0; padding:24px;
+      min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(180deg,var(--bg),#071226 60%);
+      color:#e6eef8; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    .container{
+      width:100%; max-width:1200px;
+      text-align:center;
+    }
+    h1{margin:0 0 8px; font-size:20px; font-weight:600}
+    p.lead{margin:0 0 18px; color:var(--muted)}
+    #showBtn{
+      padding:12px 18px; border-radius:10px; border:0; background:var(--accent);
+      color:#fff; font-weight:600; cursor:pointer; box-shadow:0 8px 20px rgba(37,99,235,0.18);
+      transition:transform .15s ease, background .15s ease;
+    }
+    #showBtn:active{transform:translateY(1px)}
+    #showBtn:disabled{opacity:.6; cursor:default}
+
+    .frame-box{
+      margin:20px auto 0; position:relative; width:calc(100% - 48px);
+      max-width:1200px; aspect-ratio:16/9; border-radius:12px; overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
+      box-shadow:0 16px 40px rgba(2,6,23,0.6); opacity:0; transform:translateY(10px) scale(.995);
+      transition:opacity .32s ease, transform .32s ease; pointer-events:none; visibility:hidden;
+    }
+    .frame-box.visible{opacity:1; transform:translateY(0) scale(1); pointer-events:auto; visibility:visible}
+    iframe{width:100%; height:100%; border:0; display:block}
+
+    /* Loader overlay */
+    .loader{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.4));
+      transition:opacity .25s ease; opacity:0; visibility:hidden;
+    }
+    .loader.visible{opacity:1; visibility:visible}
+    .spinner{
+      width:56px; height:56px; border-radius:50%; border:6px solid rgba(255,255,255,0.08);
+      border-top-color:var(--accent); animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .close-btn{
+      position:absolute; top:10px; right:10px; z-index:20; border:0; background:rgba(0,0,0,0.45);
+      color:#fff; width:38px; height:38px; border-radius:8px; cursor:pointer; font-size:16px;
+      display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+    }
+    .close-btn:focus{outline:2px solid rgba(37,99,235,0.6)}
+
+    /* Responsive tweaks */
+    @media (max-width:640px){
+      h1{font-size:16px}
+      .spinner{width:40px;height:40px;border-width:5px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BI_Financiero</h1>
+    <p class="lead">Haz clic para abrir el informe de Power BI. Se carga sólo cuando lo solicitas para mejorar rendimiento.</p>
+
+    <button id="showBtn" aria-haspopup="dialog" aria-controls="reportBox">Clic para ver informe Power BI</button>
+
+    <div class="frame-box" id="reportBox" role="region" aria-label="Informe Power BI">
+      <iframe id="reportFrame" title="BI_Financiero"
+        data-src="https://app.powerbi.com/reportEmbed?reportId=82c6c69b-7010-44af-82dc-9c1f60fe3348&autoAuth=true&ctid=f7fee036-7a3d-4d3e-81c9-d32525ad9c56"
+        allowfullscreen
+        loading="lazy"></iframe>
+
+      <div class="loader" id="loader" aria-hidden="true">
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
+
+      <button id="closeBtn" class="close-btn" aria-label="Cerrar informe">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // Element references
+    const btn = document.getElementById('showBtn');
+    const box = document.getElementById('reportBox');
+    const frame = document.getElementById('reportFrame');
+    const loader = document.getElementById('loader');
+    const closeBtn = document.getElementById('closeBtn');
+
+    // Open report: lazy-load iframe and show loader
+    btn.addEventListener('click', () => {
+      if (!frame.src){
+        frame.src = frame.dataset.src;
+      }
+      btn.disabled = true;
+      loader.classList.add('visible');
+      box.classList.add('visible');
+
+      // When iframe finishes loading, hide loader
+      frame.addEventListener('load', () => {
+        loader.classList.remove('visible');
+      }, { once: true });
+    });
+
+    // Close report
+    function closeReport(){
+      box.classList.remove('visible');
+      // after transition, hide completely and re-enable button
+      const onEnd = () => {
+        btn.disabled = false;
+        // clear src to free resources (optional)
+        try{ frame.removeAttribute('src'); }catch(e){}
+        box.removeEventListener('transitionend', onEnd);
+      };
+      box.addEventListener('transitionend', onEnd);
+    }
+    closeBtn.addEventListener('click', closeReport);
+
+    // Close with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && box.classList.contains('visible')) closeReport();
+    });
+  </script>
+</body>
+</html>
