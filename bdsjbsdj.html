@@ -11,6 +11,13 @@
       --accent:#2563eb;
       --muted:#94a3b8;
     }
+    body.light{
+      --bg:#f5f8ff;
+      --card:#ffffff;
+      --muted:#475569;
+      color:#1f2937;
+      background:linear-gradient(180deg,var(--bg),#e2e8f0 60%);
+    }
     *{box-sizing:border-box}
     body {
       margin:0; padding:24px;
@@ -25,6 +32,7 @@
     }
     h1{margin:0 0 8px; font-size:20px; font-weight:600}
     p.lead{margin:0 0 18px; color:var(--muted)}
+    .controls{display:flex; justify-content:center; gap:12px; flex-wrap:wrap}
     #showBtn{
       padding:12px 18px; border-radius:10px; border:0; background:var(--accent);
       color:#fff; font-weight:600; cursor:pointer; box-shadow:0 8px 20px rgba(37,99,235,0.18);
@@ -32,6 +40,13 @@
     }
     #showBtn:active{transform:translateY(1px)}
     #showBtn:disabled{opacity:.6; cursor:default}
+    #themeBtn{
+      padding:12px 18px; border-radius:10px; border:1px solid var(--accent);
+      background:transparent; color:var(--accent); font-weight:600;
+      cursor:pointer; transition:background .15s ease;
+    }
+    #themeBtn:hover{background:rgba(37,99,235,0.1)}
+    body.light #themeBtn{color:#2563eb}
 
     .frame-box{
       margin:20px auto 0; position:relative; width:calc(100% - 48px);
@@ -62,6 +77,9 @@
       display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
     }
     .close-btn:focus{outline:2px solid rgba(37,99,235,0.6)}
+    body.light .close-btn{background:rgba(0,0,0,0.1); color:#1f2937}
+
+    .footer{margin-top:40px; color:var(--muted); font-size:12px}
 
     /* Responsive tweaks */
     @media (max-width:640px){
@@ -75,7 +93,10 @@
     <h1>BI_Financiero</h1>
     <p class="lead">Haz clic para abrir el informe de Power BI. Se carga sólo cuando lo solicitas para mejorar rendimiento.</p>
 
-    <button id="showBtn" aria-haspopup="dialog" aria-controls="reportBox">Clic para ver informe Power BI</button>
+    <div class="controls">
+      <button id="showBtn" aria-haspopup="dialog" aria-controls="reportBox">Clic para ver informe Power BI</button>
+      <button id="themeBtn" aria-label="Cambiar a modo claro">Modo claro</button>
+    </div>
 
     <div class="frame-box" id="reportBox" role="region" aria-label="Informe Power BI">
       <iframe id="reportFrame" title="BI_Financiero"
@@ -89,6 +110,7 @@
 
       <button id="closeBtn" class="close-btn" aria-label="Cerrar informe">✕</button>
     </div>
+    <footer class="footer">Demostración de Power BI</footer>
   </div>
 
   <script>
@@ -98,6 +120,7 @@
     const frame = document.getElementById('reportFrame');
     const loader = document.getElementById('loader');
     const closeBtn = document.getElementById('closeBtn');
+    const themeBtn = document.getElementById('themeBtn');
 
     // Open report: lazy-load iframe and show loader
     btn.addEventListener('click', () => {
@@ -131,6 +154,14 @@
     // Close with Escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && box.classList.contains('visible')) closeReport();
+    });
+
+    // Theme toggle
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      const light = document.body.classList.contains('light');
+      themeBtn.textContent = light ? 'Modo oscuro' : 'Modo claro';
+      themeBtn.setAttribute('aria-label', light ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
     });
   </script>
 </body>
