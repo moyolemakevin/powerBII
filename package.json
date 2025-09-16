@@ -1,0 +1,22 @@
+{
+  "name": "powerbii",
+  "version": "1.0.0",
+  "description": "Panel financiero con embedding seguro de Power BI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "powerbi",
+    "embedding",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@azure/msal-node": "^1.18.4",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

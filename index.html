@@ -29,10 +29,7 @@
     </section>
 
     <div class="frame-box" id="reportBox" role="region" aria-label="Informe Power BI">
-      <iframe id="reportFrame" title="BI Financiero"
-        data-src="https://app.powerbi.com/reportEmbed?reportId=33c6357c-71c1-432a-a673-e7e9d29b7324&autoAuth=true&ctid=f7fee036-7a3d-4d3e-81c9-d32525ad9c56"
-        allowfullscreen
-        loading="lazy"></iframe>
+      <div id="reportContainer" class="report-surface" role="presentation" aria-hidden="true"></div>
 
       <div class="loader" id="loader" aria-hidden="true">
         <div class="spinner" aria-hidden="true"></div>
@@ -44,6 +41,7 @@
     <footer class="footer">Demostración de Power BI para dirección financiera.</footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js" crossorigin="anonymous"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
