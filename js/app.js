@@ -10,7 +10,34 @@ const fullscreenBtn = document.getElementById('fullscreenBtn');
 const reportMenu = document.getElementById('reportMenu');
 const reportOptions = reportMenu ? Array.from(reportMenu.querySelectorAll('.report-option')) : [];
 const MENU_TOGGLE_DEBOUNCE_MS = 120;
+const CACHE_BUSTER_PARAM = '_cb';
 let lastMenuToggleTime = 0;
+
+function addCacheBuster(src){
+  const timestamp = Date.now().toString();
+
+  try {
+    const url = new URL(src, window.location.href);
+    url.searchParams.set(CACHE_BUSTER_PARAM, timestamp);
+    return url.toString();
+  } catch (error) {
+    const separator = src.includes('?') ? '&' : '?';
+    return `${src}${separator}${CACHE_BUSTER_PARAM}=${timestamp}`;
+  }
+}
+
+function loadReportSrc(src, { forceReload = false } = {}){
+  if (!frame || !loader) return;
+
+  const targetSrc = forceReload ? addCacheBuster(src) : src;
+
+  loader.classList.add('visible');
+  frame.addEventListener('load', () => {
+    loader.classList.remove('visible');
+  }, { once: true });
+
+  frame.setAttribute('src', targetSrc);
+}
 
 function isFullscreenActive(){
   return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
@@ -117,45 +144,27 @@ function setActiveReport(src){
 function startReport(report){
   if (!report || !report.src) return;
 
+  const previousSrc = frame.dataset.src;
+  const alreadyVisible = box.classList.contains('visible');
+  const sameReport = previousSrc === report.src && alreadyVisible;
+
   frame.dataset.src = report.src;
   if (report.title) {
     frame.setAttribute('title', report.title);
   }
   setActiveReport(report.src);
 
-  const currentSrc = frame.getAttribute('src');
-  const alreadyVisible = box.classList.contains('visible');
-  const sameReport = currentSrc === report.src && alreadyVisible;
-
   box.classList.add('visible');
 
-  if (sameReport) {
-    loader.classList.remove('visible');
-    return;
-  }
-
-  loader.classList.add('visible');
-  frame.addEventListener('load', () => {
-    loader.classList.remove('visible');
-  }, { once: true });
-  frame.setAttribute('src', report.src);
+  loadReportSrc(report.src, { forceReload: sameReport });
 }
 
 function updateReportAccess(newSrc) {
   // Revoca el acceso aquí (lógica de backend o gestión de permisos)
   // Luego, recarga el iframe con el nuevo src que refleja el cambio de permisos
-  
-  // Limpiar el contenido actual del iframe y actualizar con el nuevo src (token de acceso actualizado)
-  frame.setAttribute('src', 'about:blank');  // Resetea el iframe
-  frame.setAttribute('src', newSrc);  // Vuelve a cargar el informe con el nuevo src (token de acceso actualizado)
-  
-  // Asegúrate de que el iframe recargue correctamente
-  frame.addEventListener('load', () => {
-    loader.classList.remove('visible');
-  }, { once: true });
-  
-  // Mostrar cargando mientras se carga el nuevo informe
-  loader.classList.add('visible');
+
+  frame.dataset.src = newSrc;
+  loadReportSrc(newSrc, { forceReload: true });
 }
 
 if (btn){
